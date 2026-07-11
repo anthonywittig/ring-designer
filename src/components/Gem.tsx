@@ -67,13 +67,13 @@ function studioEnvTexture(): THREE.Texture {
   canvas.height = 512;
   const ctx = canvas.getContext("2d")!;
 
-  // Mid-bright studio base: light enough that the stone reads white, dark
-  // enough that facets keep contrast.
+  // Lightbox base: bright in EVERY direction (like a jewelry photo tent) so
+  // the stone reads white from any camera angle. Contrast comes from the
+  // dark bars, not from a dark background.
   const bg = ctx.createLinearGradient(0, 0, 0, 512);
-  bg.addColorStop(0, "#c4c4cf");
-  bg.addColorStop(0.45, "#8d8d97");
-  bg.addColorStop(0.75, "#6a6a74");
-  bg.addColorStop(1, "#4a4a54");
+  bg.addColorStop(0, "#ffffff");
+  bg.addColorStop(0.5, "#dcdce4");
+  bg.addColorStop(1, "#b8b8c2");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 1024, 512);
 
@@ -87,18 +87,17 @@ function studioEnvTexture(): THREE.Texture {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, hgt);
   };
-  // Hot softboxes for sparkle highlights, dark bars for facet contrast.
-  panel(80, 20, 260, 110);
-  panel(430, 10, 280, 90);
-  panel(780, 30, 200, 110);
-  panel(150, 200, 46, 200, "#1a1a20");
-  panel(370, 180, 40, 220, "#22222a");
-  panel(600, 200, 46, 200, "#1a1a20");
-  panel(850, 190, 40, 210, "#22222a");
-  panel(500, 250, 60, 120, "#ffe7c4");
-  // Low fill panels so the pavilion stays lively from side views.
-  panel(60, 400, 180, 70, "#e8e8f0");
-  panel(700, 410, 200, 60, "#e8e8f0");
+  // Dark bars all around the equator and below for facet contrast.
+  for (let i = 0; i < 8; i++) {
+    panel(30 + i * 128, 150, 44, 260, i % 2 ? "#22222a" : "#14141a");
+  }
+  // Hot softboxes above and low fill strips between the bars.
+  panel(80, 15, 240, 110);
+  panel(430, 10, 260, 95);
+  panel(780, 20, 190, 110);
+  panel(240, 430, 160, 60);
+  panel(620, 435, 170, 55);
+  panel(500, 240, 56, 110, "#ffe7c4");
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.mapping = THREE.EquirectangularReflectionMapping;

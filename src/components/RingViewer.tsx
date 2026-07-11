@@ -52,7 +52,7 @@ export default function RingViewer({
     <Canvas
       frameloop="demand"
       dpr={Math.min(window.devicePixelRatio, 2)}
-      camera={{ position: [16, 10, 42], fov: 32 }}
+      camera={{ position: [14, 24, 36], fov: 32 }}
     >
       <color attach="background" args={["#f2f1ee"]} />
       <ambientLight intensity={0.3} />
