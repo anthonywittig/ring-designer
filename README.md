@@ -52,6 +52,8 @@ The first geometry appears after the ~10 MB WASM kernel loads (cached afterwards
 - No stone seat cut into the prongs, no basket/halo/bezel/cathedral variants.
 - Pear/marquise (V-prong tip family) not implemented.
 - No pavé — this is the known performance risk to prove next.
-- Gem env-map is a procedural canvas texture; a real HDR studio map would
-  polish the sparkle further.
+- Lighting is hybrid by design: the metal is lit by a CC0 Poly Haven studio
+  HDRI, while the diamond keeps a procedural high-contrast sparkle map —
+  photographed studios are mostly dark walls, which reads black through a
+  refractive stone.
 - Prices/densities are placeholder constants in `params.ts`.

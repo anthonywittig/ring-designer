@@ -96,7 +96,11 @@ export function buildRing(params: RingParams): {
     for (const sz of [1, -1]) {
       const base: [number, number, number] = [xBase, sy * yBase, sz * zBase];
       const tip: [number, number, number] = [tipX, sy * yTip, sz * zTip];
-      const d = [tip[0] - base[0], tip[1] - base[1], tip[2] - base[2]];
+      const d: [number, number, number] = [
+        tip[0] - base[0],
+        tip[1] - base[1],
+        tip[2] - base[2],
+      ];
       const len = Math.hypot(d[0], d[1], d[2]);
       const prong = makeCylinder(prongR, len, base, d);
       // Claw tip: a cap nudged in over the stone.
