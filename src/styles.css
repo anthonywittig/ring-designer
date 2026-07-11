@@ -1,0 +1,154 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1c1c28;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.busy {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #555;
+}
+
+.bottombar {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 12px 20px;
+  border-top: 1px solid #e2e2e2;
+  background: #fff;
+}
+
+.stat {
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8a8a96;
+}
+
+.fine {
+  font-size: 11px;
+  color: #8a8a96;
+}
+
+.export {
+  margin-left: auto;
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.export:disabled {
+  background: #b9b6f0;
+  cursor: default;
+}
+
+.panel {
+  width: 340px;
+  overflow-y: auto;
+  border-left: 1px solid #e2e2e2;
+  padding: 18px 20px 40px;
+  background: #fafafa;
+}
+
+.panel h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.hint {
+  margin: 0 0 18px;
+  font-size: 12.5px;
+  color: #8a8a96;
+}
+
+.panel section {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.panel h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.panel label {
+  display: block;
+  font-size: 12.5px;
+  color: #55555f;
+  margin: 10px 0 6px;
+}
+
+.panel label .val {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.panel input[type="range"] {
+  width: 100%;
+  accent-color: #4f46e5;
+}
+
+.opt-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.opt {
+  border: 1px solid #c7c5f4;
+  background: #fff;
+  color: #4f46e5;
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.opt.active {
+  background: linear-gradient(135deg, #6d5ef2, #4f46e5);
+  border-color: #4f46e5;
+  color: #fff;
+}

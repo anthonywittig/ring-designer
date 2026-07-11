@@ -3,8 +3,9 @@ import opencascadeWasm from "replicad-opencascadejs/src/replicad_single.wasm?url
 import { setOC } from "replicad";
 import { expose } from "comlink";
 
-import { buildRing, type RingGeometryInfo } from "./ring";
+import { buildRing } from "./ring";
 import type { RingParams } from "./params";
+import type { MeshResult } from "./worker-api";
 
 let loaded = false;
 const init = async () => {
@@ -17,11 +18,6 @@ const init = async () => {
   return true;
 };
 const started = init();
-
-export interface MeshResult {
-  faces: unknown; // replicad mesh payload, consumed by replicad-threejs-helper
-  info: RingGeometryInfo;
-}
 
 async function createMesh(params: RingParams): Promise<MeshResult> {
   await started;
