@@ -127,7 +127,15 @@ export default function Gem({
   const envMap = useMemo(studioEnvTexture, []);
 
   return (
-    <mesh geometry={geometry} position={position}>
+    // The key forces a remount when the stone changes: drei's
+    // MeshRefractionMaterial builds its BVH once on mount and never rebuilds
+    // it, so without this every stone refracts against the first stone's
+    // facet cage (larger stones escape it entirely and render flat).
+    <mesh
+      key={`${cut}-${widthMM.toFixed(3)}-${lengthMM.toFixed(3)}`}
+      geometry={geometry}
+      position={position}
+    >
       <MeshRefractionMaterial
         envMap={envMap}
         bounces={3}
