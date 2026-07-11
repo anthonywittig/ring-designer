@@ -19,7 +19,8 @@
     "replicad": "^0.23.1",
     "replicad-opencascadejs": "^0.23.0",
     "replicad-threejs-helper": "^0.23.0",
-    "three": "^0.169.0"
+    "three": "^0.169.0",
+    "three-stdlib": "^2.36.1"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.7",

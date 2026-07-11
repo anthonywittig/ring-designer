@@ -25,7 +25,7 @@ as real CAD solids (B-Rep, not display meshes) and exported as manufacturable ST
 | --- | --- |
 | CAD kernel | [replicad](https://replicad.xyz) (OpenCascade via WASM), in a web worker via [comlink](https://github.com/GoogleChromeLabs/comlink) |
 | Rendering | three.js + @react-three/fiber, `replicad-threejs-helper` to sync kernel meshes |
-| Gem display | procedural faceted mesh (display only, not in the STL) |
+| Gem display | convex-hull brilliant-cut mesh + drei `MeshRefractionMaterial` (ray-traced refraction & dispersion; display only, not in the STL) |
 | App | Vite + React + TypeScript |
 
 ## Run it
@@ -52,5 +52,6 @@ The first geometry appears after the ~10 MB WASM kernel loads (cached afterwards
 - No stone seat cut into the prongs, no basket/halo/bezel/cathedral variants.
 - Pear/marquise (V-prong tip family) not implemented.
 - No pavé — this is the known performance risk to prove next.
-- Gem rendering is a cheap faceted approximation, not photoreal refraction.
+- Gem env-map is a procedural canvas texture; a real HDR studio map would
+  polish the sparkle further.
 - Prices/densities are placeholder constants in `params.ts`.
