@@ -1,43 +1,96 @@
 import React, { useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
-import { EquirectangularReflectionMapping } from "three";
-import { RGBELoader } from "three-stdlib";
+import {
+  CanvasTexture,
+  EquirectangularReflectionMapping,
+  SRGBColorSpace,
+} from "three";
 import ReplicadMesh from "./ReplicadMesh";
 import Gem from "./Gem";
 import type { MeshResult } from "../worker-api";
 import { METALS, type RingParams } from "../params";
 
-// CC0 studio HDRI from polyhaven.com lights the metal via the scene
-// environment. The diamond deliberately uses its own high-contrast sparkle
-// map (see Gem.tsx): photographed studios are mostly dark walls, which
-// flatters metal but reads black through a refractive stone.
-import hdrUrl from "../assets/studio_small_08_1k.hdr?url";
+// Procedural "giant softbox" studio: white ceiling, pale grey walls, mild
+// warm floor bounce, plus a few huge feathered white panels. Replaces the
+// photographed HDR whose dark walls printed harsh near-black bands on the
+// metal. three r169 auto-PMREMs any equirect scene.environment texture, so a
+// plain CanvasTexture needs no manual PMREM and no Suspense (drei's
+// useEnvironment/<Environment> hang in production builds and stay banned).
+// Module-cached so remounts reuse the same GPU texture.
+let cachedSoftboxEnv: CanvasTexture | null = null;
+function softboxEnvTexture(): CanvasTexture {
+  if (cachedSoftboxEnv) return cachedSoftboxEnv;
+  const W = 1024;
+  const H = 512;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d")!;
 
-// Load the HDR imperatively instead of via drei's useEnvironment: the
-// Suspense/useLoader path hung forever in production builds (no error, no
-// resolution - blank canvas). This way the scene renders immediately, the
-// environment pops in when ready, and failures actually log.
+  // Base: pale-grey ceiling -> mid-grey walls -> warm floor tone. The walls
+  // sit a clear step below the white softbox panels so the panels survive
+  // the PMREM blur as broad highlights; nothing goes darker than warm
+  // mid-grey, so no harsh dark reflection bands either.
+  const base = ctx.createLinearGradient(0, 0, 0, H);
+  base.addColorStop(0.0, "#d8d9de");
+  base.addColorStop(0.4, "#c6c7cd");
+  base.addColorStop(0.62, "#b4b6bd");
+  base.addColorStop(0.82, "#a89f8e"); // warm floor bounce for the gold mids
+  base.addColorStop(1.0, "#948a77");
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, W, H);
+
+  // Huge feathered ellipse of light, drawn at x, x-W and x+W so the
+  // equirect seam stays continuous.
+  const softbox = (
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number,
+    alpha = 1,
+    rgb = "255,255,255",
+  ) => {
+    for (const x of [cx, cx - W, cx + W]) {
+      if (x + rx < 0 || x - rx > W) continue;
+      ctx.save();
+      ctx.translate(x, cy);
+      ctx.scale(rx, ry);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(0, `rgba(${rgb},${alpha})`);
+      g.addColorStop(0.55, `rgba(${rgb},${alpha * 0.65})`);
+      g.addColorStop(1, `rgba(${rgb},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(-1, -1, 2, 2);
+      ctx.restore();
+    }
+  };
+
+  // Two overhead softboxes (broad top highlights on the band).
+  softbox(230, 85, 280, 120);
+  softbox(730, 75, 320, 130);
+  // Equator-height side sweeps: the long soft white highlights that sweep
+  // along the band sides, spaced around the ring so every azimuth catches
+  // at least one.
+  softbox(60, 245, 240, 170, 1);
+  softbox(560, 255, 300, 185, 0.95);
+  softbox(910, 250, 220, 160, 0.9);
+  // Low warm fill so inner surfaces shade warm, not grey.
+  softbox(400, 430, 320, 100, 0.5, "255,240,221");
+
+  const tex = new CanvasTexture(canvas);
+  tex.mapping = EquirectangularReflectionMapping;
+  tex.colorSpace = SRGBColorSpace;
+  cachedSoftboxEnv = tex;
+  return tex;
+}
+
 function StudioEnvironment() {
   const scene = useThree((s) => s.scene);
   useEffect(() => {
-    let disposed = false;
-    new RGBELoader().load(
-      hdrUrl,
-      (tex) => {
-        if (disposed) {
-          tex.dispose();
-          return;
-        }
-        tex.mapping = EquirectangularReflectionMapping;
-        scene.environment = tex;
-      },
-      undefined,
-      (err) => console.error("Failed to load studio HDR environment:", err),
-    );
+    scene.environment = softboxEnvTexture();
     return () => {
-      disposed = true;
-      scene.environment = null;
+      scene.environment = null; // texture is module-cached; just detach
     };
   }, [scene]);
   return null;
@@ -69,6 +122,8 @@ export default function RingViewer({
     // A continuous frameloop (the default): demand mode missed repaints when
     // async pieces (env texture, worker mesh) arrived, and the refraction
     // material updates per-frame uniforms anyway.
+    // The canvas stays transparent so the CSS backdrop gradient
+    // (.canvas-wrap) shows through as the white->grey studio sweep.
     <Canvas
       dpr={Math.min(window.devicePixelRatio, 2)}
       // Framed so even a 3ct head stays in view on load.
@@ -77,10 +132,10 @@ export default function RingViewer({
         (window as any).__ringState = state;
       }}
     >
-      <ambientLight intensity={0.25} />
-      {/* Key light adds a defined hot highlight on the band on top of the
-          even HDRI reflections. */}
-      <directionalLight position={[6, 14, 8]} intensity={0.7} />
+      <ambientLight intensity={0.15} />
+      {/* The softbox env does most of the lighting; the directional is the
+          one crisp accent highlight. */}
+      <directionalLight position={[6, 14, 8]} intensity={0.65} />
       <OrbitControls
         makeDefault
         target={[0, 2, 0]}
@@ -104,15 +159,15 @@ export default function RingViewer({
             />
           </group>
           {/* Soft shadow under the lowest point of the band grounds the
-              ring instead of leaving it floating on the backdrop. */}
+              ring on the backdrop without going sooty. */}
           <ContactShadows
             position={[0, -result.info.bandOuterRadiusMM - 0.01, 0]}
-            opacity={0.38}
+            opacity={0.26}
             scale={46}
-            blur={2.4}
+            blur={3.2}
             far={result.info.bandOuterRadiusMM * 2.2}
             resolution={512}
-            color="#3a3630"
+            color="#6f675a"
           />
         </>
       )}

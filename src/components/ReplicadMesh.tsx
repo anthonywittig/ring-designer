@@ -28,15 +28,16 @@ export default React.memo(function ReplicadMesh({
 
   return (
     <mesh geometry={geometry.current}>
-      {/* Polished metal: low roughness for tight env reflections, a light
-          clearcoat for the wet "just buffed" highlight jewelers photograph. */}
+      {/* Soft-studio metal: the roughness blurs the PMREM mips into broad
+          soft highlight sweeps; intensity stays moderate so pale metals keep
+          metallic value range instead of washing to porcelain. */}
       <meshPhysicalMaterial
         color={color}
         metalness={1}
-        roughness={0.09}
-        envMapIntensity={1.25}
-        clearcoat={0.6}
-        clearcoatRoughness={0.22}
+        roughness={0.13}
+        envMapIntensity={1.05}
+        clearcoat={0.3}
+        clearcoatRoughness={0.4}
       />
     </mesh>
   );

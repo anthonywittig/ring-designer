@@ -68,12 +68,12 @@ function studioEnvTexture(): THREE.Texture {
   const ctx = canvas.getContext("2d")!;
 
   // Lightbox base: bright in EVERY direction (like a jewelry photo tent) so
-  // the stone reads white from any camera angle. Contrast comes from the
-  // dark bars, not from a dark background.
+  // the stone reads icy white from any camera angle. Contrast comes from
+  // LIGHT-GREY bars, never black — the facets should read soft and gemmy.
   const bg = ctx.createLinearGradient(0, 0, 0, 512);
   bg.addColorStop(0, "#ffffff");
-  bg.addColorStop(0.5, "#dcdce4");
-  bg.addColorStop(1, "#b8b8c2");
+  bg.addColorStop(0.5, "#eceef2");
+  bg.addColorStop(1, "#d3d6dd");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 1024, 512);
 
@@ -87,11 +87,20 @@ function studioEnvTexture(): THREE.Texture {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, hgt);
   };
-  // Dark bars all around the equator and below for facet contrast. Narrow
-  // mid-grey bars, not near-black slabs: the stone should read bright with
-  // crisp dark accents, not checkerboard black.
-  for (let i = 0; i < 8; i++) {
-    panel(30 + i * 128, 150, 30, 260, i % 2 ? "#4a4a56" : "#33333c");
+  // Light-grey contrast bars around the equator and below: crisp facet
+  // definition in light greys, not a black checkerboard. Feathered edges
+  // (soft horizontal gradient) so facet lines read gemmy, not jagged.
+  const softBar = (x: number, w: number, color: string) => {
+    const g = ctx.createLinearGradient(x, 0, x + w, 0);
+    g.addColorStop(0, "rgba(143,150,169,0)");
+    g.addColorStop(0.35, color);
+    g.addColorStop(0.65, color);
+    g.addColorStop(1, "rgba(143,150,169,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(x, 150, w, 260);
+  };
+  for (let i = 0; i < 10; i++) {
+    softBar(14 + i * 102, 46, i % 2 ? "#a3a9b8" : "#8f96a9");
   }
   // Hot softboxes above and low fill strips between the bars.
   panel(80, 15, 240, 110);
@@ -99,7 +108,11 @@ function studioEnvTexture(): THREE.Texture {
   panel(780, 20, 190, 110);
   panel(240, 430, 160, 60);
   panel(620, 435, 170, 55);
-  panel(500, 240, 56, 110, "#fff1dc");
+  // Small cool accents for subtle blue/violet hints in the facets — one on
+  // each side so slightly-rotated views still catch a hint.
+  panel(500, 240, 48, 110, "#8fa0e8");
+  panel(130, 250, 40, 100, "#9dabea");
+  panel(840, 235, 36, 100, "#a4b0ec");
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.mapping = THREE.EquirectangularReflectionMapping;
@@ -140,10 +153,10 @@ export default function Gem({
     >
       <MeshRefractionMaterial
         envMap={envMap}
-        bounces={4}
+        bounces={3}
         ior={2.42}
-        fresnel={0.9}
-        aberrationStrength={0.012}
+        fresnel={1}
+        aberrationStrength={0.008}
         color="#ffffff"
         fastChroma
         toneMapped={false}
