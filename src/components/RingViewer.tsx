@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { ContactShadows, OrbitControls } from "@react-three/drei";
 import { EquirectangularReflectionMapping } from "three";
 import { RGBELoader } from "three-stdlib";
 import ReplicadMesh from "./ReplicadMesh";
@@ -71,26 +71,50 @@ export default function RingViewer({
     // material updates per-frame uniforms anyway.
     <Canvas
       dpr={Math.min(window.devicePixelRatio, 2)}
-      camera={{ position: [14, 24, 36], fov: 32 }}
+      // Framed so even a 3ct head stays in view on load.
+      camera={{ position: [16, 26, 42], fov: 32 }}
       onCreated={(state) => {
         (window as any).__ringState = state;
       }}
     >
-      <color attach="background" args={["#f2f1ee"]} />
-      <ambientLight intensity={0.3} />
-      <OrbitControls makeDefault target={[0, 2, 0]} />
+      <ambientLight intensity={0.25} />
+      {/* Key light adds a defined hot highlight on the band on top of the
+          even HDRI reflections. */}
+      <directionalLight position={[6, 14, 8]} intensity={0.7} />
+      <OrbitControls
+        makeDefault
+        target={[0, 2, 0]}
+        enableDamping
+        dampingFactor={0.08}
+        minDistance={12}
+        maxDistance={90}
+        maxPolarAngle={Math.PI * 0.55}
+      />
       <StudioEnvironment />
       {result && (
-        // Model space: band around Z, head along +X. Rotate head up (+Y).
-        <group rotation={[0, 0, Math.PI / 2]}>
-          <ReplicadMesh faces={result.faces} color={metalColor} />
-          <Gem
-            cut={params.cut}
-            widthMM={result.info.stoneWidthMM}
-            lengthMM={result.info.stoneLengthMM}
-            position={[result.info.girdleX, 0, 0]}
+        <>
+          {/* Model space: band around Z, head along +X. Rotate head up (+Y). */}
+          <group rotation={[0, 0, Math.PI / 2]}>
+            <ReplicadMesh faces={result.faces} color={metalColor} />
+            <Gem
+              cut={params.cut}
+              widthMM={result.info.stoneWidthMM}
+              lengthMM={result.info.stoneLengthMM}
+              position={[result.info.girdleX, 0, 0]}
+            />
+          </group>
+          {/* Soft shadow under the lowest point of the band grounds the
+              ring instead of leaving it floating on the backdrop. */}
+          <ContactShadows
+            position={[0, -result.info.bandOuterRadiusMM - 0.01, 0]}
+            opacity={0.38}
+            scale={46}
+            blur={2.4}
+            far={result.info.bandOuterRadiusMM * 2.2}
+            resolution={512}
+            color="#3a3630"
           />
-        </group>
+        </>
       )}
     </Canvas>
   );

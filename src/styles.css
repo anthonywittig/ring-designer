@@ -24,6 +24,10 @@ body {
   flex: 1;
   position: relative;
   min-height: 0;
+  /* Studio backdrop behind the transparent canvas: bright sweep that falls
+     off toward the edges, like a jewelry photo cove. */
+  background:
+    radial-gradient(120% 90% at 50% 38%, #fdfcfa 0%, #f1efe9 55%, #dcd8cf 100%);
 }
 
 .busy {

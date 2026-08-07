@@ -22,7 +22,9 @@ const started = init();
 async function createMesh(params: RingParams): Promise<MeshResult> {
   await started;
   const { shape, info } = buildRing(params);
-  return { faces: shape.mesh({ tolerance: 0.05, angularTolerance: 15 }), info };
+  // Display mesh: fine enough that the band silhouette reads as a smooth
+  // polished surface (15deg angular tolerance left visible facets).
+  return { faces: shape.mesh({ tolerance: 0.01, angularTolerance: 5 }), info };
 }
 
 async function createBlob(params: RingParams): Promise<Blob> {
