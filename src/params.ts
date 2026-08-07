@@ -67,13 +67,13 @@ export interface MetalInfo {
 }
 
 export const METALS: Record<MetalId, MetalInfo> = {
-  "14k-yellow": { label: "14K Yellow", densityGCM3: 13.0, pricePerGram: 62, color: "#e8c07c" },
-  "14k-white": { label: "14K White", densityGCM3: 12.7, pricePerGram: 62, color: "#e9eaec" },
-  "14k-rose": { label: "14K Rose", densityGCM3: 13.0, pricePerGram: 62, color: "#e6a889" },
-  "18k-yellow": { label: "18K Yellow", densityGCM3: 15.5, pricePerGram: 80, color: "#eec66f" },
-  "18k-white": { label: "18K White", densityGCM3: 15.7, pricePerGram: 80, color: "#ecedef" },
-  "18k-rose": { label: "18K Rose", densityGCM3: 15.2, pricePerGram: 80, color: "#e8a184" },
-  platinum: { label: "Platinum", densityGCM3: 21.4, pricePerGram: 34, color: "#e3e5ea" },
+  "14k-yellow": { label: "14K Yellow", densityGCM3: 13.0, pricePerGram: 62, color: "#ebc885" },
+  "14k-white": { label: "14K White", densityGCM3: 12.7, pricePerGram: 62, color: "#f6f6f3" },
+  "14k-rose": { label: "14K Rose", densityGCM3: 13.0, pricePerGram: 62, color: "#f2c4ac" },
+  "18k-yellow": { label: "18K Yellow", densityGCM3: 15.5, pricePerGram: 80, color: "#e5ba68" },
+  "18k-white": { label: "18K White", densityGCM3: 15.7, pricePerGram: 80, color: "#f3f3ef" },
+  "18k-rose": { label: "18K Rose", densityGCM3: 15.2, pricePerGram: 80, color: "#efb797" },
+  platinum: { label: "Platinum", densityGCM3: 21.4, pricePerGram: 34, color: "#e0e4eb" },
 };
 
 // Flat labor estimate: casting + finishing + setting. Placeholder constants.
