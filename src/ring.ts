@@ -18,6 +18,7 @@ export interface RingGeometryInfo {
   girdleX: number; // radial position of the stone's girdle plane
   stoneWidthMM: number; // across the band (Y)
   stoneLengthMM: number; // along the finger (Z)
+  bandOuterRadiusMM: number; // for placing the display floor/shadow
   volumeMM3: number;
 }
 
@@ -133,6 +134,12 @@ export function buildRing(params: RingParams): {
 
   return {
     shape,
-    info: { girdleX, stoneWidthMM: W, stoneLengthMM: L, volumeMM3 },
+    info: {
+      girdleX,
+      stoneWidthMM: W,
+      stoneLengthMM: L,
+      bandOuterRadiusMM: Ro,
+      volumeMM3,
+    },
   };
 }

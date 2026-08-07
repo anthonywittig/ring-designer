@@ -28,11 +28,15 @@ export default React.memo(function ReplicadMesh({
 
   return (
     <mesh geometry={geometry.current}>
-      <meshStandardMaterial
+      {/* Polished metal: low roughness for tight env reflections, a light
+          clearcoat for the wet "just buffed" highlight jewelers photograph. */}
+      <meshPhysicalMaterial
         color={color}
         metalness={1}
-        roughness={0.15}
-        envMapIntensity={1.3}
+        roughness={0.09}
+        envMapIntensity={1.25}
+        clearcoat={0.6}
+        clearcoatRoughness={0.22}
       />
     </mesh>
   );

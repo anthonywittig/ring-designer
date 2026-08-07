@@ -87,9 +87,11 @@ function studioEnvTexture(): THREE.Texture {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, hgt);
   };
-  // Dark bars all around the equator and below for facet contrast.
+  // Dark bars all around the equator and below for facet contrast. Narrow
+  // mid-grey bars, not near-black slabs: the stone should read bright with
+  // crisp dark accents, not checkerboard black.
   for (let i = 0; i < 8; i++) {
-    panel(30 + i * 128, 150, 44, 260, i % 2 ? "#22222a" : "#14141a");
+    panel(30 + i * 128, 150, 30, 260, i % 2 ? "#4a4a56" : "#33333c");
   }
   // Hot softboxes above and low fill strips between the bars.
   panel(80, 15, 240, 110);
@@ -97,7 +99,7 @@ function studioEnvTexture(): THREE.Texture {
   panel(780, 20, 190, 110);
   panel(240, 430, 160, 60);
   panel(620, 435, 170, 55);
-  panel(500, 240, 56, 110, "#ffe7c4");
+  panel(500, 240, 56, 110, "#fff1dc");
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.mapping = THREE.EquirectangularReflectionMapping;
@@ -138,10 +140,10 @@ export default function Gem({
     >
       <MeshRefractionMaterial
         envMap={envMap}
-        bounces={3}
+        bounces={4}
         ior={2.42}
-        fresnel={0.6}
-        aberrationStrength={0.03}
+        fresnel={0.9}
+        aberrationStrength={0.012}
         color="#ffffff"
         fastChroma
         toneMapped={false}
