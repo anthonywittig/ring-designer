@@ -2,9 +2,12 @@ import React, { useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
 import {
-  CanvasTexture,
+  DataTexture,
+  DataUtils,
   EquirectangularReflectionMapping,
-  SRGBColorSpace,
+  HalfFloatType,
+  LinearSRGBColorSpace,
+  RGBAFormat,
 } from "three";
 import ReplicadMesh from "./ReplicadMesh";
 import Gem from "./Gem";
@@ -14,12 +17,19 @@ import { METALS, type RingParams } from "../params";
 // Procedural "giant softbox" studio: white ceiling, pale grey walls, mild
 // warm floor bounce, plus a few huge feathered white panels. Replaces the
 // photographed HDR whose dark walls printed harsh near-black bands on the
-// metal. three r169 auto-PMREMs any equirect scene.environment texture, so a
-// plain CanvasTexture needs no manual PMREM and no Suspense (drei's
-// useEnvironment/<Environment> hang in production builds and stay banned).
+// metal. three r169 auto-PMREMs any equirect scene.environment texture, so
+// no manual PMREM and no Suspense (drei's useEnvironment/<Environment> hang
+// in production builds and stay banned).
 // Module-cached so remounts reuse the same GPU texture.
-let cachedSoftboxEnv: CanvasTexture | null = null;
-function softboxEnvTexture(): CanvasTexture {
+
+// How far the softbox panels rise above 1.0 in the float env. A plain 8-bit
+// canvas caps at 1.0, which is why the metal read soft/ceramic: highlights
+// could never punch through tone mapping the way a real HDR's windows do.
+// Only pixels already near-white get boosted, so walls and floor stay put.
+const HIGHLIGHT_BOOST = 2.75;
+
+let cachedSoftboxEnv: DataTexture | null = null;
+function softboxEnvTexture(): DataTexture {
   if (cachedSoftboxEnv) return cachedSoftboxEnv;
   const W = 1024;
   const H = 512;
@@ -78,9 +88,36 @@ function softboxEnvTexture(): CanvasTexture {
   // Low warm fill so inner surfaces shade warm, not grey.
   softbox(400, 430, 320, 100, 0.5, "255,240,221");
 
-  const tex = new CanvasTexture(canvas);
+  // Lift the drawn canvas into a half-float HDR texture: sRGB -> linear by
+  // hand, then push only the brightest pixels (the panels) above 1.0.
+  // Rows are flipped manually because UNPACK_FLIP_Y does not apply to typed
+  // array uploads, and equirect sampling expects row 0 at the bottom.
+  const img = ctx.getImageData(0, 0, W, H).data;
+  const data = new Uint16Array(W * H * 4);
+  for (let y = 0; y < H; y++) {
+    const src = y * W;
+    const dst = (H - 1 - y) * W;
+    for (let x = 0; x < W; x++) {
+      const si = (src + x) * 4;
+      const di = (dst + x) * 4;
+      for (let c = 0; c < 3; c++) {
+        const srgb = img[si + c] / 255;
+        const lin =
+          srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+        // Smoothstep ramp over the top of the range: walls (<~0.62 linear)
+        // are untouched, panel cores gain the full boost.
+        const t = Math.min(1, Math.max(0, (lin - 0.62) / 0.38));
+        data[di + c] = DataUtils.toHalfFloat(
+          lin * (1 + HIGHLIGHT_BOOST * t * t),
+        );
+      }
+      data[di + 3] = DataUtils.toHalfFloat(1);
+    }
+  }
+  const tex = new DataTexture(data, W, H, RGBAFormat, HalfFloatType);
   tex.mapping = EquirectangularReflectionMapping;
-  tex.colorSpace = SRGBColorSpace;
+  tex.colorSpace = LinearSRGBColorSpace;
+  tex.needsUpdate = true;
   cachedSoftboxEnv = tex;
   return tex;
 }

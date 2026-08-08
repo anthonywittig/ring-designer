@@ -34,7 +34,7 @@ export default React.memo(function ReplicadMesh({
       <meshPhysicalMaterial
         color={color}
         metalness={1}
-        roughness={0.13}
+        roughness={0.12}
         envMapIntensity={1.05}
         clearcoat={0.3}
         clearcoatRoughness={0.4}
